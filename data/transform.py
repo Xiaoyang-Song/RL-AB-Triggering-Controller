@@ -9,7 +9,7 @@ sys.path.append(gp_path)
 from ford_ped_backend_single import *
 
 # Root folder
-root_folder = "simulation_data"
+root_folder = "simulation"
 
 # Columns to read
 cols_to_use = [
@@ -18,7 +18,7 @@ cols_to_use = [
     "e_location_x", "e_location_y"
 ]
 
-trigger_prob = 1/10
+trigger_prob = 1/200
 C_1 = 1
 C_2 = 1
 
@@ -37,8 +37,10 @@ t=ford_ped_calc_service()
 
 # List to store all trajectories
 all_trajectories = []
+print(f"number of trajectories found: {len(os.listdir(root_folder))}")
+count_trigger = 0
 
-for traj_id in range(1, 11):
+for traj_id in range(1, len(os.listdir(root_folder))+1):
     traj_folder = os.path.join(root_folder, str(traj_id), "measurments")
     file_path = os.path.join(traj_folder, "measurements.csv")
     collision_path = os.path.join(traj_folder, "collision.csv")
@@ -65,6 +67,7 @@ for traj_id in range(1, 11):
 
         if len(trigger_indices) > 0:
             first_trigger = trigger_indices[0]
+            count_trigger += 1
 
             # Case 2 & 3 (trigger case)
             if eventual_collision:
@@ -119,9 +122,12 @@ for traj_df in all_trajectories:
     traj_rl = traj_df[selected_cols].copy()
     rl_trajectories.append(traj_rl)
 
-# Example: check the first trajectory
+
+print(f"count_trigger: {count_trigger}")
 print("Length of first trajectory:", len(rl_trajectories[0]))
 print(rl_trajectories[0].head())
+
+print(f"Total trajectories processed: {len(rl_trajectories)}")
 
 with open('aggregated/rl_trajectories.pkl', 'wb') as f:
     pickle.dump(rl_trajectories, f)
