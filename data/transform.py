@@ -1,4 +1,5 @@
 import numpy as np
+import pickle
 import pandas as pd
 import os 
 import sys
@@ -121,3 +122,10 @@ for traj_df in all_trajectories:
 # Example: check the first trajectory
 print("Length of first trajectory:", len(rl_trajectories[0]))
 print(rl_trajectories[0].head())
+
+with open('aggregated/rl_trajectories.pkl', 'wb') as f:
+    pickle.dump(rl_trajectories, f)
+
+# Load it back
+# with open('aggregated/rl_trajectories.pkl', 'rb') as f:
+#     loaded_list = pickle.load(f)
