@@ -7,12 +7,14 @@ import pandas as pd
 from tqdm import tqdm
 import matplotlib.pyplot as plt
 import random
+import os
+os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
 
 # --- Hyperparameters ---
 gamma = 0.99
 lr = 1e-3
 num_epochs = 50
-batch_size = 128
+batch_size = 64
 val_ratio = 0.1
 seed = 42
 
@@ -25,7 +27,7 @@ print("Device:", device)
 
 # --- Define Q-network ---
 class QNetwork(nn.Module):
-    def __init__(self, state_dim=4, action_dim=2, hidden_dim=64):
+    def __init__(self, state_dim=4, action_dim=2, hidden_dim=32):
         super().__init__()
         self.net = nn.Sequential(
             nn.Linear(state_dim, hidden_dim),
