@@ -39,6 +39,7 @@ t=ford_ped_calc_service()
 all_trajectories = []
 print(f"number of trajectories found: {len(os.listdir(root_folder))}")
 count_trigger = 0
+count_case_1, count_case_2, count_case_3 = 0, 0, 0
 
 for traj_id in range(1, len(os.listdir(root_folder))+1):
     traj_folder = os.path.join(root_folder, str(traj_id), "measurments")
@@ -71,6 +72,7 @@ for traj_id in range(1, len(os.listdir(root_folder))+1):
 
             # Case 2 & 3 (trigger case)
             if eventual_collision:
+                count_case_2 += 1
                 # Case 2: triggered and eventual collision → blank for now
                 collision_frame = pd.read_csv(collision_path)["frame"].iloc[0]
                 collision_v_ego = df.loc[df["frame"] == collision_frame, "ego_vel_ms"].values[0] * 3.6
@@ -84,6 +86,7 @@ for traj_id in range(1, len(os.listdir(root_folder))+1):
                 # print(iir)
                 df.loc[first_trigger, "reward"] = -iir
             else:
+                count_case_3 += 1
                 # Case 3: triggered and no collision → -C2
                 df.loc[first_trigger, "reward"] = -C_2
 
@@ -93,6 +96,7 @@ for traj_id in range(1, len(os.listdir(root_folder))+1):
         # Case 1:
         # No trigger but collision happens eventually
         if eventual_collision and len(trigger_indices) == 0:
+            count_case_1 += 1
             # collision occurs but agent never triggered
             # penalize final time step
             df.loc[df.index[-1], "reward"] = -C_1
@@ -124,6 +128,9 @@ for traj_df in all_trajectories:
 
 
 print(f"count_trigger: {count_trigger}")
+print(f"count_case_1 (no trigger but collision): {count_case_1}")
+print(f"count_case_2 (trigger and collision): {count_case_2}")
+print(f"count_case_3 (trigger but no collision): {count_case_3}")
 print("Length of first trajectory:", len(rl_trajectories[0]))
 print(rl_trajectories[0].head())
 
