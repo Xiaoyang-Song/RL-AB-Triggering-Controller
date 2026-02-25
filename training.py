@@ -143,6 +143,9 @@ for epoch in tqdm(range(num_epochs)):
 
     print(f"Epoch {epoch+1}/{num_epochs} | Train Loss: {train_loss:.6f} | Val Loss: {val_loss:.6f}")
 
+checkpoint_path = os.path.join('checkpoints', 'model', 'q_net.pth')
+torch.save(q_net.state_dict(), checkpoint_path)
+
 # --- Plot ---
 plt.figure()
 plt.plot(train_losses, label="Train Loss")
