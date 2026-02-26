@@ -19,8 +19,8 @@ cols_to_use = [
 ]
 
 trigger_prob = 1/200
-C_1 = 1
-C_2 = 1
+C_1 = 0.5
+C_2 = 0.5
 
 # param_root = "../GP_pred/"
 
