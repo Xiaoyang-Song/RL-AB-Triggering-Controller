@@ -77,7 +77,7 @@ for traj_id in range(1, len(os.listdir(root_folder))+1):
 
 results = []
 t=ford_ped_calc_service()
-data = list(zip(all_trajectories, collisions))   # limit to 100 trajectories for quick evaluation
+data = list(zip(all_trajectories, collisions))  # limit to 100 trajectories for quick evaluation
 
 for df, has_collision in tqdm(data):
 

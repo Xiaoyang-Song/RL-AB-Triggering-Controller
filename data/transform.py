@@ -9,7 +9,7 @@ sys.path.append(gp_path)
 from ford_ped_backend_single import *
 
 # Root folder
-root_folder = "simulation"
+root_folder = "data/simulation"
 
 # Columns to read
 cols_to_use = [
@@ -84,8 +84,11 @@ for traj_id in range(1, len(os.listdir(root_folder))+1):
                 # print(f"Predicted Injury Risks [head chest femur tibia]\n>> {ir}")
                 iir = pjoint(ir)
                 # print(iir)
-                df.loc[first_trigger, "reward"] = -iir
+                df.loc[first_trigger, "reward"] = iir - 1
             else:
+                # Balance training cases
+                if count_case_3 >= 300:
+                    continue
                 count_case_3 += 1
                 # Case 3: triggered and no collision → -C2
                 df.loc[first_trigger, "reward"] = -C_2
@@ -95,7 +98,7 @@ for traj_id in range(1, len(os.listdir(root_folder))+1):
 
         # Case 1:
         # No trigger but collision happens eventually
-        if eventual_collision and len(trigger_indices) == 0:
+        elif eventual_collision and len(trigger_indices) == 0:
             count_case_1 += 1
             # collision occurs but agent never triggered
             # penalize final time step
@@ -136,7 +139,7 @@ print(rl_trajectories[0].head())
 
 print(f"Total trajectories processed: {len(rl_trajectories)}")
 
-with open('aggregated/rl_trajectories.pkl', 'wb') as f:
+with open('data/aggregated/rl_trajectories.pkl', 'wb') as f:
     pickle.dump(rl_trajectories, f)
 
 # Load it back
