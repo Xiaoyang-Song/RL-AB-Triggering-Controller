@@ -18,9 +18,12 @@ cols_to_use = [
     "e_location_x", "e_location_y"
 ]
 
+
+# Adjust critical values
 trigger_prob = 1/200
-C_1 = 1
-C_2 = 0.5
+C_1 = 5 # No trigger but collision (Type II error)
+C_2 = 5 # Trigger but no collision (Type I error)
+C_3 = 0.2
 
 # param_root = "../GP_pred/"
 
@@ -84,7 +87,8 @@ for traj_id in range(1, len(os.listdir(root_folder))+1):
                 # print(f"Predicted Injury Risks [head chest femur tibia]\n>> {ir}")
                 iir = pjoint(ir)
                 # print(iir)
-                df.loc[first_trigger, "reward"] = iir - 1
+                # df.loc[first_trigger, "reward"] = iir - 1
+                df.loc[first_trigger, "reward"] = 5 if iir > C_3 else -5
             else:
                 # Balance training cases
                 if count_case_3 >= 300:
@@ -100,9 +104,18 @@ for traj_id in range(1, len(os.listdir(root_folder))+1):
         # No trigger but collision happens eventually
         elif eventual_collision and len(trigger_indices) == 0:
             count_case_1 += 1
+            collision_frame = pd.read_csv(collision_path)["frame"].iloc[0]
+            collision_v_ego = df.loc[df["frame"] == collision_frame, "ego_vel_ms"].values[0] * 3.6
+            collision_v_ped = 1.2 * 3.6
+            # --height=1.65 --sex=F --bmi=27.13 --offset=0 --orientation=-90 --vped=5 --vego=60 --vstiffness=0.956 --vtype=SUV --age=30
+            data = np.array([0, 1.65, 'F', float(27.13), float(0), float(-90), 
+                                float(collision_v_ped), 0.956, 'SUV', 30, float(collision_v_ego)])
+            ir=t.predict_injury(data)
+            # print(f"Predicted Injury Risks [head chest femur tibia]\n>> {ir}")
+            iir = pjoint(ir)
             # collision occurs but agent never triggered
             # penalize final time step
-            df.loc[df.index[-1], "reward"] = -C_1
+            df.loc[df.index[-1], "reward"] = -C_1 if iir > C_3 else 1
         
         # Optionally, add a column for trajectory ID
         df["trajectory_id"] = traj_id

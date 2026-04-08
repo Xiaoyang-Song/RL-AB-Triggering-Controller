@@ -10,10 +10,11 @@ import random
 import os
 os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
 
+
 # --- Hyperparameters ---
 gamma = 0.99
 lr = 1e-3
-num_epochs = 200
+num_epochs = 50
 batch_size = 128
 val_ratio = 0.1
 seed = 42
