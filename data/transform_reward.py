@@ -41,7 +41,7 @@ def parse_args():
                         help="Injury risk threshold")
 
     # Optional dataset balancing
-    parser.add_argument("--max_case3", type=int, default=None,
+    parser.add_argument("--max_case3", type=int, default=300,
                         help="Optional cap on number of no-collision trigger trajectories")
 
     # Demographic / model inputs

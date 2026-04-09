@@ -108,10 +108,10 @@ for df, has_collision in tqdm(data):
     for idx, row in df.iterrows():
 
         state = np.array([
+            row["walker_vel_ms"],
+            row["ego_vel_ms"],
             row["dx"],
             row["dy"],
-            row["walker_vel_ms"],
-            row["ego_vel_ms"]
         ], dtype=np.float32)
 
         state_tensor = torch.tensor(state, device=device).unsqueeze(0)

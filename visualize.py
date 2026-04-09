@@ -24,4 +24,6 @@ trigger_collision_cases = (
 # count_case_2 (trigger and collision): 1823
 # count_case_3 (trigger but no collision): 300
 
-print(trigger_collision_cases)
+print(trigger_collision_cases[['trajectory_id', 'trigger_frame', 
+                               'collision_frame', 'ttc_at_trigger', 
+                               'pjoint']].head(5))
