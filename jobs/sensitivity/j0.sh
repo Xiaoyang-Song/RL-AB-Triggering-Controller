@@ -30,9 +30,9 @@ TRIGGER_PROB=0.005
 # Training
 # =========================
 NUM_EPOCHS=500
-LR=5e-2
+LR=5e-3
 HIDDEN_DIM=128
-BATCH_SIZE=4096
+BATCH_SIZE=8192
  
 # =========================
 # Pipeline

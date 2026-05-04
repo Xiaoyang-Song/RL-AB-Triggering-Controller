@@ -1,0 +1,57 @@
+loading model: GP_pred/GP_hic.json
+loading model: GP_pred/GP_lacc.json
+loading model: GP_pred/GP_ln.json
+loading model: GP_pred/GP_pelvis.json
+loading model: GP_pred/GP_racc.json
+loading model: GP_pred/GP_rn.json
+loading model: GP_pred/GP_sternum.json
+number of trajectories found: 4940
+File not found: data/simulation/447/measurments/measurements.csv
+File not found: data/simulation/448/measurments/measurements.csv
+File not found: data/simulation/754/measurments/measurements.csv
+File not found: data/simulation/785/measurments/measurements.csv
+File not found: data/simulation/1006/measurments/measurements.csv
+File not found: data/simulation/1233/measurments/measurements.csv
+File not found: data/simulation/1234/measurments/measurements.csv
+File not found: data/simulation/1887/measurments/measurements.csv
+File not found: data/simulation/1888/measurments/measurements.csv
+File not found: data/simulation/1889/measurments/measurements.csv
+File not found: data/simulation/1890/measurments/measurements.csv
+File not found: data/simulation/2189/measurments/measurements.csv
+File not found: data/simulation/2449/measurments/measurements.csv
+File not found: data/simulation/2450/measurments/measurements.csv
+File not found: data/simulation/2451/measurments/measurements.csv
+File not found: data/simulation/2496/measurments/measurements.csv
+File not found: data/simulation/3027/measurments/measurements.csv
+File not found: data/simulation/3028/measurments/measurements.csv
+File not found: data/simulation/3432/measurments/measurements.csv
+File not found: data/simulation/3869/measurments/measurements.csv
+File not found: data/simulation/3903/measurments/measurements.csv
+File not found: data/simulation/4093/measurments/measurements.csv
+File not found: data/simulation/4094/measurments/measurements.csv
+File not found: data/simulation/4550/measurments/measurements.csv
+File not found: data/simulation/4551/measurments/measurements.csv
+File not found: data/simulation/4802/measurments/measurements.csv
+count_trigger: 2069
+count_case_1 (no trigger + collision): 1108
+count_case_2 (trigger + collision): 1069
+count_case_3 (trigger + no collision): 1000
+count_case_4 (no trigger + no collision): 408
+Length of first trajectory: 123
+   frame  walker_vel_ms  ego_vel_ms  ...  reward  eventual_collision  high_risk
+0      0       0.000000   18.731708  ...     0.0                   1          1
+1      1       0.078659   18.572876  ...     0.0                   1          1
+2      2       0.157318   18.521971  ...     0.0                   1          1
+3      3       0.235977   18.513009  ...     0.0                   1          1
+4      4       0.314636   18.511854  ...     0.0                   1          1
+
+[5 rows x 9 columns]
+Total trajectories processed: 3585
+Saved trajectories to: data/aggregated/rl_trajectories_b15.0_c16.0_b25.0_c25.0_c35.0_eta0.2.pkl
+Device: cuda
+Loading data from: data/aggregated/rl_trajectories_b15.0_c16.0_b25.0_c25.0_c35.0_eta0.2.pkl
+Train trajectories: 3226
+Validation trajectories: 359
+Training samples: 450329
+Validation samples: 52770
+Training:   0%|          | 0/500 [00:00<?, ?it/s]Training:   0%|          | 1/500 [00:03<31:14,  3.76s/it]Training:   0%|          | 2/500 [00:07<30:02,  3.62s/it]Training:   1%|          | 3/500 [00:10<29:31,  3.56s/it]Training:   1%|          | 4/500 [00:14<29:14,  3.54s/it]Training:   1%|          | 5/500 [00:17<29:01,  3.52s/it]Training:   1%|          | 6/500 [00:21<28:53,  3.51s/it]Training:   1%|▏         | 7/500 [00:24<28:44,  3.50s/it]Training:   2%|▏         | 8/500 [00:28<28:39,  3.49s/it]Training:   2%|▏         | 9/500 [00:31<28:36,  3.50s/it]Training:   2%|▏         | 10/500 [00:35<28:29,  3.49s/it]Training:   2%|▏         | 11/500 [00:38<28:23,  3.48s/it]Training:   2%|▏         | 12/500 [00:42<28:18,  3.48s/it]Training:   3%|▎         | 13/500 [00:45<28:14,  3.48s/it]Training:   3%|▎         | 14/500 [00:49<28:10,  3.48s/it]Training:   3%|▎         | 15/500 [00:52<28:07,  3.48s/it]Training:   3%|▎         | 16/500 [00:56<28:04,  3.48s/it]Training:   3%|▎         | 17/500 [00:59<28:05,  3.49s/it]Training:   4%|▎         | 18/500 [01:03<28:02,  3.49s/it]Training:   4%|▍         | 19/500 [01:06<27:55,  3.48s/it]Training:   4%|▍         | 20/500 [01:09<27:51,  3.48s/it]Training:   4%|▍         | 21/500 [01:13<27:46,  3.48s/it]Training:   4%|▍         | 22/500 [01:16<27:41,  3.48s/it]Training:   5%|▍         | 23/500 [01:20<27:38,  3.48s/it]Training:   5%|▍         | 24/500 [01:23<27:34,  3.48s/it]Training:   5%|▌         | 25/500 [01:27<27:31,  3.48s/it]Training:   5%|▌         | 26/500 [01:30<27:28,  3.48s/it]Training:   5%|▌         | 27/500 [01:34<27:25,  3.48s/it]Training:   6%|▌         | 28/500 [01:37<27:25,  3.49s/it]Training:   6%|▌         | 29/500 [01:41<27:24,  3.49s/it]Training:   6%|▌         | 30/500 [01:44<27:18,  3.49s/it]Training:   6%|▌         | 31/500 [01:48<27:13,  3.48s/it]Training:   6%|▋         | 32/500 [01:51<27:08,  3.48s/it]Training:   7%|▋         | 33/500 [01:55<27:03,  3.48s/it]Training:   7%|▋         | 34/500 [01:58<26:58,  3.47s/it]Training:   7%|▋         | 35/500 [02:02<26:55,  3.47s/it]Training:   7%|▋         | 36/500 [02:05<26:51,  3.47s/it]Training:   7%|▋         | 37/500 [02:09<26:48,  3.47s/it]Training:   8%|▊         | 38/500 [02:12<26:45,  3.47s/it]Training:   8%|▊         | 39/500 [02:16<26:42,  3.48s/it]Training:   8%|▊         | 40/500 [02:19<26:40,  3.48s/it]Training:   8%|▊         | 41/500 [02:23<26:35,  3.48s/it]Training:   8%|▊         | 42/500 [02:26<26:33,  3.48s/it]Training:   9%|▊         | 43/500 [02:29<26:29,  3.48s/it]Training:   9%|▉         | 44/500 [02:33<26:26,  3.48s/it]Training:   9%|▉         | 45/500 [02:36<26:22,  3.48s/it]Training:   9%|▉         | 46/500 [02:40<26:17,  3.47s/it]Training:   9%|▉         | 47/500 [02:43<26:12,  3.47s/it]Training:  10%|▉         | 48/500 [02:47<26:09,  3.47s/it]Training:  10%|▉         | 49/500 [02:50<26:06,  3.47s/it]Training:  10%|█         | 50/500 [02:54<26:02,  3.47s/it]Training:  10%|█         | 51/500 [02:57<25:59,  3.47s/it]Training:  10%|█         | 52/500 [03:01<25:56,  3.47s/it]Training:  11%|█         | 53/500 [03:04<25:51,  3.47s/it]Training:  11%|█         | 54/500 [03:08<25:47,  3.47s/it]Training:  11%|█         | 55/500 [03:11<25:44,  3.47s/it]Training:  11%|█         | 56/500 [03:15<25:40,  3.47s/it]Training:  11%|█▏        | 57/500 [03:18<25:36,  3.47s/it]Training:  12%|█▏        | 58/500 [03:22<25:33,  3.47s/it]Training:  12%|█▏        | 59/500 [03:25<25:29,  3.47s/it]Training:  12%|█▏        | 60/500 [03:29<25:27,  3.47s/it]Training:  12%|█▏        | 61/500 [03:32<25:26,  3.48s/it]Training:  12%|█▏        | 62/500 [03:35<25:24,  3.48s/it]Training:  13%|█▎        | 63/500 [03:39<25:20,  3.48s/it]Training:  13%|█▎        | 64/500 [03:42<25:16,  3.48s/it]Training:  13%|█▎        | 65/500 [03:46<25:12,  3.48s/it]Training:  13%|█▎        | 66/500 [03:49<25:09,  3.48s/it]Training:  13%|█▎        | 67/500 [03:53<25:06,  3.48s/it]Training:  14%|█▎        | 68/500 [03:56<25:03,  3.48s/it]Training:  14%|█▍        | 69/500 [04:00<24:59,  3.48s/it]Training:  14%|█▍        | 70/500 [04:03<24:55,  3.48s/it]Training:  14%|█▍        | 71/500 [04:07<24:51,  3.48s/it]Training:  14%|█▍        | 72/500 [04:10<24:47,  3.48s/it]Training:  15%|█▍        | 73/500 [04:14<24:44,  3.48s/it]Training:  15%|█▍        | 74/500 [04:17<24:40,  3.48s/it]Training:  15%|█▌        | 75/500 [04:21<24:38,  3.48s/it]Training:  15%|█▌        | 76/500 [04:24<24:35,  3.48s/it]Training:  15%|█▌        | 77/500 [04:28<24:32,  3.48s/it]Training:  16%|█▌        | 78/500 [04:31<24:29,  3.48s/it]Training:  16%|█▌        | 79/500 [04:35<24:28,  3.49s/it]Training:  16%|█▌        | 80/500 [04:38<24:26,  3.49s/it]Training:  16%|█▌        | 81/500 [04:42<24:24,  3.50s/it]Training:  16%|█▋        | 82/500 [04:45<24:19,  3.49s/it]Training:  17%|█▋        | 83/500 [04:49<24:14,  3.49s/it]Training:  17%|█▋        | 84/500 [04:52<24:10,  3.49s/it]Training:  17%|█▋        | 85/500 [04:56<24:05,  3.48s/it]Training:  17%|█▋        | 86/500 [04:59<24:01,  3.48s/it]Training:  17%|█▋        | 87/500 [05:03<23:57,  3.48s/it]Training:  18%|█▊        | 88/500 [05:06<23:52,  3.48s/it]Training:  18%|█▊        | 89/500 [05:09<23:49,  3.48s/it]Training:  18%|█▊        | 90/500 [05:13<23:45,  3.48s/it]Training:  18%|█▊        | 91/500 [05:16<23:42,  3.48s/it]Training:  18%|█▊        | 92/500 [05:20<23:38,  3.48s/it]Training:  19%|█▊        | 93/500 [05:23<23:33,  3.47s/it]Training:  19%|█▉        | 94/500 [05:27<23:29,  3.47s/it]Training:  19%|█▉        | 95/500 [05:30<23:27,  3.48s/it]Training:  19%|█▉        | 96/500 [05:34<23:24,  3.48s/it]Training:  19%|█▉        | 97/500 [05:37<23:21,  3.48s/it]Training:  20%|█▉        | 98/500 [05:41<23:20,  3.48s/it]Training:  20%|█▉        | 99/500 [05:44<23:18,  3.49s/it]Training:  20%|██        | 100/500 [05:48<23:17,  3.49s/it]Training:  20%|██        | 101/500 [05:51<23:14,  3.49s/it]Training:  20%|██        | 102/500 [05:55<23:09,  3.49s/it]Training:  21%|██        | 103/500 [05:58<23:03,  3.49s/it]Training:  21%|██        | 104/500 [06:02<22:59,  3.48s/it]Training:  21%|██        | 105/500 [06:05<22:55,  3.48s/it]Training:  21%|██        | 106/500 [06:09<22:51,  3.48s/it]Training:  21%|██▏       | 107/500 [06:12<22:47,  3.48s/it]Training:  22%|██▏       | 108/500 [06:16<22:42,  3.48s/it]Training:  22%|██▏       | 109/500 [06:19<22:39,  3.48s/it]Training:  22%|██▏       | 110/500 [06:23<22:35,  3.48s/it]Training:  22%|██▏       | 111/500 [06:26<22:30,  3.47s/it]Training:  22%|██▏       | 112/500 [06:29<22:26,  3.47s/it]Training:  23%|██▎       | 113/500 [06:33<22:23,  3.47s/it]Training:  23%|██▎       | 114/500 [06:36<22:19,  3.47s/it]Training:  23%|██▎       | 115/500 [06:40<22:16,  3.47s/it]Training:  23%|██▎       | 116/500 [06:43<22:12,  3.47s/it]Training:  23%|██▎       | 117/500 [06:47<22:11,  3.48s/it]Training:  24%|██▎       | 118/500 [06:50<22:09,  3.48s/it]Training:  24%|██▍       | 119/500 [06:54<22:08,  3.49s/it]Training:  24%|██▍       | 120/500 [06:57<22:04,  3.49s/it]Training:  24%|██▍       | 121/500 [07:01<22:00,  3.48s/it]Training:  24%|██▍       | 122/500 [07:04<21:56,  3.48s/it]Training:  25%|██▍       | 123/500 [07:08<21:52,  3.48s/it]Training:  25%|██▍       | 124/500 [07:11<21:49,  3.48s/it]Training:  25%|██▌       | 125/500 [07:15<21:44,  3.48s/it]Training:  25%|██▌       | 126/500 [07:18<21:41,  3.48s/it]Training:  25%|██▌       | 127/500 [07:22<21:39,  3.48s/it]Training:  26%|██▌       | 128/500 [07:25<21:36,  3.49s/it]Training:  26%|██▌       | 129/500 [07:29<21:33,  3.49s/it]Training:  26%|██▌       | 130/500 [07:32<21:30,  3.49s/it]Training:  26%|██▌       | 131/500 [07:36<21:26,  3.49s/it]Training:  26%|██▋       | 132/500 [07:39<21:22,  3.48s/it]Training:  27%|██▋       | 133/500 [07:43<21:18,  3.48s/it]Training:  27%|██▋       | 134/500 [07:46<21:13,  3.48s/it]Training:  27%|██▋       | 135/500 [07:50<21:11,  3.48s/it]Training:  27%|██▋       | 136/500 [07:53<21:09,  3.49s/it]Training:  27%|██▋       | 137/500 [07:57<21:05,  3.49s/it]Training:  28%|██▊       | 138/500 [08:00<21:03,  3.49s/it]
