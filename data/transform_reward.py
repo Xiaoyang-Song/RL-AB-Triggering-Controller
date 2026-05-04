@@ -18,8 +18,8 @@ def parse_args():
     )
 
     # Paths
-    parser.add_argument("--root_folder", type=str, default="data/simulation")
-    parser.add_argument("--output_path", type=str, default="data/aggregated/rl_trajectories.pkl")
+    parser.add_argument("--root_folder", type=str, default="data/simulation/")
+    parser.add_argument("--output_dir", type=str, default="data/aggregated/")
 
     # Random trigger generation
     parser.add_argument("--trigger_prob", type=float, default=1 / 200)
@@ -73,7 +73,8 @@ def compute_joint_injury_risk(service, row, args):
     Assumes the backend model can use current ego/pedestrian speeds as proxies.
     """
     collision_v_ego = float(row["ego_vel_ms"]) * 3.6
-    collision_v_ped = float(row["walker_vel_ms"]) * 3.6
+    # collision_v_ped = float(row["walker_vel_ms"]) * 3.6
+    collision_v_ped = 1.2 * 3.6
 
     data = np.array([
         0,
@@ -104,6 +105,13 @@ def load_collision_frame(collision_path):
 
     return collision_df["frame"].iloc[0]
 
+
+def build_output_filename(args):
+    param_str = (
+        f"b1{args.b1}_c1{args.c1}_b2{args.b2}_c2{args.c2}_c3{args.c3}_eta{args.eta}"
+    )
+    base_dir = os.path.dirname(args.output_dir)
+    return os.path.join(base_dir, f"rl_trajectories_{param_str}.pkl")
 
 def assign_terminal_reward(triggered, collision_happens, high_risk, args):
     """
@@ -204,6 +212,9 @@ def main():
         else:
             collision_index = None
 
+        
+        high_risk = False
+
         if first_trigger is not None:
             # Trigger happens before any collision by construction
             # trigger_row = df.loc[first_trigger]
@@ -255,8 +266,11 @@ def main():
             # No trigger and no collision: keep full trajectory, all rewards 0
             count_case_4 += 1
 
+        df["eventual_collision"] = int(eventual_collision)
+        df["high_risk"] = int(high_risk)
+ 
         all_trajectories.append(df)
-
+ 
     selected_cols = [
         "frame",
         "walker_vel_ms",
@@ -265,6 +279,8 @@ def main():
         "dy",
         "action_trigger",
         "reward",
+        "eventual_collision",
+        "high_risk",
     ]
 
     for traj_df in all_trajectories:
@@ -283,11 +299,12 @@ def main():
 
     print(f"Total trajectories processed: {len(rl_trajectories)}")
 
-    os.makedirs(os.path.dirname(args.output_path), exist_ok=True)
-    with open(args.output_path, "wb") as f:
+    output_path = build_output_filename(args)
+    os.makedirs(os.path.dirname(output_path), exist_ok=True)
+    with open(output_path, "wb") as f:
         pickle.dump(rl_trajectories, f)
 
-    print(f"Saved trajectories to: {args.output_path}")
+    print(f"Saved trajectories to: {output_path}")
 
 
 if __name__ == "__main__":

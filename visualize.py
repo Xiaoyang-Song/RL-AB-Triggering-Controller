@@ -1,114 +1,135 @@
+import argparse
 import pandas as pd
 import numpy as np
 
 
-results_df = pd.read_csv("evaluation_results.csv")
-print(results_df[['trajectory_id', 'trigger_frame', 'collision', 'triggered',
-                               'collision_frame', 'ttc_at_trigger', 
-                               'pjoint']].head(5))
+def parse_args():
+    parser = argparse.ArgumentParser(description="Analyse evaluation results for airbag triggering.")
 
-# trigger_collision_cases = (
-#     results_df.loc[s
-#         (results_df["triggered"]) & (results_df["collision"]) & (results_df["trigger_frame"] < results_df["collision_frame"])
-#     ]
-#     .reset_index(drop=True)
-# )
+    # Paths
+    parser.add_argument("--results_dir", type=str, default="results")
 
-trigger_collision_cases = (
-    results_df.loc[
-        (results_df["triggered"]==False) & (results_df["collision"]==False)
+    # Reward / eta parameters (used only for resolving filename)
+    parser.add_argument("--b1", type=float, default=2.0)
+    parser.add_argument("--c1", type=float, default=1.5)
+    parser.add_argument("--b2", type=float, default=1.0)
+    parser.add_argument("--c2", type=float, default=3.0)
+    parser.add_argument("--c3", type=float, default=2.0)
+    parser.add_argument("--eta", type=float, default=0.2)
+
+    return parser.parse_args()
+
+
+def build_param_suffix(args):
+    return f"b1{args.b1}_c1{args.c1}_b2{args.b2}_c2{args.c2}_c3{args.c3}_eta{args.eta}"
+
+
+def main():
+    args = parse_args()
+    suffix = build_param_suffix(args)
+    results_path = f"{args.results_dir}/evaluation_results_{suffix}.csv"
+
+    print(f"Loading results from: {results_path}")
+    results_df = pd.read_csv(results_path)
+
+    print(results_df[[
+        "trajectory_id", "trigger_frame", "collision", "triggered",
+        "collision_frame", "ttc_at_trigger", "pjoint"
+    ]].head(5))
+
+    # =========================
+    # Success Trigger Rate
+    # High-risk: collision=True AND pjoint > eta
+    # =========================
+    high_risk_cases = results_df.loc[
+        (results_df["collision"] == True) & (results_df["pjoint"] > args.eta)
     ]
-    .reset_index(drop=True)
-)
+    high_risk_triggered = high_risk_cases.loc[high_risk_cases["triggered"] == True]
 
-# count_trigger: 4098
-# count_case_1 (no trigger but collision): 354
-# count_case_2 (trigger and collision): 1823
-# count_case_3 (trigger but no collision): 300
+    total_high_risk = len(high_risk_cases)
+    triggered_count = len(high_risk_triggered)
+    success_trigger_rate = (triggered_count / total_high_risk * 100) if total_high_risk > 0 else 0
 
-print(trigger_collision_cases[['trajectory_id', 'collision', 'triggered', 
-                            #    'trigger_frame','collision_frame', 
-                               'ttc_at_trigger', 
-                               'pjoint']].head(12))
+    print("\n" + "=" * 60)
+    print("SUCCESS TRIGGER RATE  (Type-II complement)")
+    print("=" * 60)
+    print(f"High-risk cases (collision=True AND pjoint > {args.eta}): {total_high_risk}")
+    print(f"Successfully triggered:                                    {triggered_count}")
+    print(f"Success trigger rate:                                      {success_trigger_rate:.2f}%")
+    print(f"Type-II error rate (missed high-risk):                     {100 - success_trigger_rate:.2f}%")
+    print("=" * 60)
 
-# =========================
-# Success Trigger Rate
-# =========================
-# Filter for high-risk cases: collision=True AND pjoint > 0.2
-high_risk_cases = results_df.loc[(results_df['collision'] == True) & (results_df['pjoint'] > 0.4)]
+    # =========================
+    # Low Injury Risk with Collision  (contributes to Type-I)
+    # collision=True AND pjoint <= eta
+    # =========================
+    low_risk_collision_cases = results_df.loc[
+        (results_df["collision"] == True) & (results_df["pjoint"] <= args.eta)
+    ]
+    total_low_risk_collision = len(low_risk_collision_cases)
+    low_risk_triggered = len(low_risk_collision_cases.loc[low_risk_collision_cases["triggered"] == True])
+    low_risk_not_triggered = len(low_risk_collision_cases.loc[low_risk_collision_cases["triggered"] == False])
+    low_risk_trigger_rate = (low_risk_triggered / total_low_risk_collision * 100) if total_low_risk_collision > 0 else 0
+    low_risk_no_trigger_rate = (low_risk_not_triggered / total_low_risk_collision * 100) if total_low_risk_collision > 0 else 0
 
-# Count how many of these high-risk cases were triggered
-high_risk_triggered = high_risk_cases.loc[high_risk_cases['triggered'] == True]
+    print("\n" + "=" * 60)
+    print("LOW INJURY RISK WITH COLLISION  (Type-I source)")
+    print("=" * 60)
+    print(f"Cases (collision=True AND pjoint <= {args.eta}):  {total_low_risk_collision}")
+    print(f"Triggered (unnecessary):   {low_risk_triggered} ({low_risk_trigger_rate:.2f}%)")
+    print(f"Not triggered (correct):   {low_risk_not_triggered} ({low_risk_no_trigger_rate:.2f}%)")
+    print("=" * 60)
 
-total_high_risk = len(high_risk_cases)
-triggered_count = len(high_risk_triggered)
+    # =========================
+    # No Collision Cases  (contributes to Type-I)
+    # =========================
+    no_collision_cases = results_df.loc[results_df["collision"] == False]
+    total_no_collision = len(no_collision_cases)
+    no_collision_triggered = len(no_collision_cases.loc[no_collision_cases["triggered"] == True])
+    no_collision_not_triggered = len(no_collision_cases.loc[no_collision_cases["triggered"] == False])
+    no_collision_trigger_rate = (no_collision_triggered / total_no_collision * 100) if total_no_collision > 0 else 0
+    no_collision_no_trigger_rate = (no_collision_not_triggered / total_no_collision * 100) if total_no_collision > 0 else 0
 
-success_trigger_rate = (triggered_count / total_high_risk * 100) if total_high_risk > 0 else 0
+    print("\n" + "=" * 60)
+    print("NO COLLISION CASES  (Type-I source)")
+    print("=" * 60)
+    print(f"Cases (collision=False):           {total_no_collision}")
+    print(f"Triggered (unnecessary):   {no_collision_triggered} ({no_collision_trigger_rate:.2f}%)")
+    print(f"Not triggered (correct):   {no_collision_not_triggered} ({no_collision_no_trigger_rate:.2f}%)")
+    print("=" * 60)
 
-print("\n" + "="*60)
-print("SUCCESS TRIGGER RATE")
-print("="*60)
-print(f"High-Risk Cases (collision=True AND pjoint > 0.2): {total_high_risk}")
-print(f"Successfully Triggered: {triggered_count}")
-print(f"Success Trigger Rate: {success_trigger_rate:.2f}%")
-print("="*60)
+    # =========================
+    # Overall Type-I / Type-II summary
+    # Mirrors the logic in evaluate.py and train.py
+    # =========================
+    type1_denom = total_low_risk_collision + total_no_collision
+    type1_count = low_risk_triggered + no_collision_triggered
+    type1_rate = (type1_count / type1_denom * 100) if type1_denom > 0 else 0
 
-# =========================
-# Low Injury Risk with Collision
-# =========================
-# Cases with collision but low injury risk: collision=True AND pjoint <= 0.2
-low_risk_collision_cases = results_df.loc[(results_df['collision'] == True) & (results_df['pjoint'] <= 0.4)]
+    type2_denom = total_high_risk
+    type2_count = total_high_risk - triggered_count
+    type2_rate = (type2_count / type2_denom * 100) if type2_denom > 0 else 0
 
-low_risk_triggered = len(low_risk_collision_cases.loc[low_risk_collision_cases['triggered'] == True])
-low_risk_not_triggered = len(low_risk_collision_cases.loc[low_risk_collision_cases['triggered'] == False])
-total_low_risk_collision = len(low_risk_collision_cases)
+    print("\n" + "=" * 60)
+    print("OVERALL ERROR SUMMARY")
+    print("=" * 60)
+    print(f"Type-I  error (false trigger):   {type1_count}/{type1_denom} = {type1_rate:.2f}%")
+    print(f"Type-II error (missed trigger):  {type2_count}/{type2_denom} = {type2_rate:.2f}%")
+    print("=" * 60)
 
-low_risk_trigger_rate = (low_risk_triggered / total_low_risk_collision * 100) if total_low_risk_collision > 0 else 0
-low_risk_no_trigger_rate = (low_risk_not_triggered / total_low_risk_collision * 100) if total_low_risk_collision > 0 else 0
+    # =========================
+    # Triggered + collision detail
+    # =========================
+    trigger_collision_cases = results_df.loc[
+        results_df["triggered"] & results_df["collision"]
+    ].reset_index(drop=True)
 
-print("\n" + "="*60)
-print("LOW INJURY RISK WITH COLLISION")
-print("="*60)
-print(f"Cases (collision=True AND pjoint <= 0.2): {total_low_risk_collision}")
-print(f"Triggered: {low_risk_triggered} ({low_risk_trigger_rate:.2f}%)")
-print(f"Not Triggered: {low_risk_not_triggered} ({low_risk_no_trigger_rate:.2f}%)")
-print("="*60)
+    # print("\nTriggered + collision cases:")
+    # print(trigger_collision_cases[[
+    #     "trajectory_id", "collision", "triggered",
+    #     "ttc_at_trigger", "pjoint"
+    # ]].head(12))
 
-# =========================
-# No Collision Cases
-# =========================
-# Cases with no collision: collision=False
-no_collision_cases = results_df.loc[results_df['collision'] == False]
 
-no_collision_triggered = len(no_collision_cases.loc[no_collision_cases['triggered'] == True])
-no_collision_not_triggered = len(no_collision_cases.loc[no_collision_cases['triggered'] == False])
-total_no_collision = len(no_collision_cases)
-
-no_collision_trigger_rate = (no_collision_triggered / total_no_collision * 100) if total_no_collision > 0 else 0
-no_collision_no_trigger_rate = (no_collision_not_triggered / total_no_collision * 100) if total_no_collision > 0 else 0
-
-print("\n" + "="*60)
-print("NO COLLISION CASES")
-print("="*60)
-print(f"Cases (collision=False): {total_no_collision}")
-print(f"Triggered: {no_collision_triggered} ({no_collision_trigger_rate:.2f}%)")
-print(f"Not Triggered: {no_collision_not_triggered} ({no_collision_no_trigger_rate:.2f}%)")
-print("="*60)
-
-# =========================
-# Failure Cases
-# =========================
-# Failure cases: high-risk but did NOT trigger
-# high_risk_failed = high_risk_cases.loc[high_risk_cases['triggered'] == False]
-
-# print("\n" + "="*60)
-# print("FAILURE CASES (High-Risk but Did NOT Trigger)")
-# print("="*60)
-# print(f"Total Failure Cases: {len(high_risk_failed)}\n")
-
-# if len(high_risk_failed) > 0:
-#     print(high_risk_failed[['trajectory_id', 'collision', 'triggered', 'pjoint', 
-#                             'ttc_at_trigger', 'collision_frame']].to_string())
-# else:
-#     print("No failure cases found!")
-# print("="*60)
+if __name__ == "__main__":
+    main()

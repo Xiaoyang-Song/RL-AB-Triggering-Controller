@@ -1,0 +1,51 @@
+#!/bin/bash
+#SBATCH --job-name=data
+#SBATCH --account=jhjin1
+#SBATCH --partition=standard
+#SBATCH --time=6:00:00
+#SBATCH --mail-type=BEGIN,END,FAIL
+#SBATCH --nodes=1
+#SBATCH --cpus-per-task=32
+#SBATCH --mem=100G
+#SBATCH --output=/nfs/turbo/coe-sunwbgt/xysong/RL-AB-Triggering-Controller/checkpoints/logs/sensitivity_j0.out
+
+
+# =========================
+# Shared reward parameters
+# =========================
+B1=5.0
+C1=5.0
+B2=5.0
+C2=5.0
+C3=5.0
+ETA=0.2
+ 
+# =========================
+# Data generation
+# =========================
+TRIGGER_PROB=0.005
+ 
+# =========================
+# Training
+# =========================
+NUM_EPOCHS=500
+LR=5e-2
+HIDDEN_DIM=128
+BATCH_SIZE=4096
+ 
+# =========================
+# Pipeline
+# =========================
+python ./data/transform_reward.py \
+    --b1 $B1 --c1 $C1 --b2 $B2 --c2 $C2 --c3 $C3 --eta $ETA \
+    --trigger_prob $TRIGGER_PROB
+ 
+python training_v2.py \
+    --b1 $B1 --c1 $C1 --b2 $B2 --c2 $C2 --c3 $C3 --eta $ETA \
+    --num_epochs $NUM_EPOCHS --lr $LR --hidden_dim $HIDDEN_DIM --batch_size $BATCH_SIZE
+ 
+python testing_v2.py \
+    --b1 $B1 --c1 $C1 --b2 $B2 --c2 $C2 --c3 $C3 --eta $ETA
+ 
+python visualize.py \
+    --b1 $B1 --c1 $C1 --b2 $B2 --c2 $C2 --c3 $C3 --eta $ETA
