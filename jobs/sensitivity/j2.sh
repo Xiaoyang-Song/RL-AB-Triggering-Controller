@@ -1,12 +1,13 @@
 #!/bin/bash
-#SBATCH --job-name=data
-#SBATCH --account=jhjin1
-#SBATCH --partition=standard
-#SBATCH --time=6:00:00
+#SBATCH --account=sunwbgt0
+#SBATCH --job-name=RL-AB-J2
+#SBATCH --mail-user=xysong@umich.edu
 #SBATCH --mail-type=BEGIN,END,FAIL
 #SBATCH --nodes=1
-#SBATCH --cpus-per-task=32
-#SBATCH --mem=100G
+#SBATCH --partition=gpu
+#SBATCH --gpus=1
+#SBATCH --mem-per-gpu=16GB
+#SBATCH --time=5:00:00
 #SBATCH --output=/nfs/turbo/coe-sunwbgt/xysong/RL-AB-Triggering-Controller/checkpoints/logs/sensitivity_j0.out
 
 
