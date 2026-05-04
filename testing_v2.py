@@ -114,6 +114,7 @@ for df, has_collision in tqdm(data, desc="Evaluating trajectories"):
 
     collision_frame = None
     p_joint = None
+    collision_v_ego = None
 
     if has_collision:
         collision_file = os.path.join(
@@ -143,6 +144,7 @@ for df, has_collision in tqdm(data, desc="Evaluating trajectories"):
     ttc_at_trigger = None
     q_wait_at_trigger = None
     q_trigger_at_trigger = None
+    speed_at_trigger = None
 
     for _, row in df.iterrows():
         current_frame = int(row["frame"])
@@ -175,6 +177,8 @@ for df, has_collision in tqdm(data, desc="Evaluating trajectories"):
             if collision_frame is not None:
                 ttc_at_trigger = collision_frame - trigger_frame
 
+            speed_at_trigger = float(row["ego_vel_ms"]) * 3.6
+
             break
 
     # case: collision occurs before any trigger
@@ -197,6 +201,8 @@ for df, has_collision in tqdm(data, desc="Evaluating trajectories"):
         "low_injury_collision": low_injury_collision,
         "q_wait_at_trigger": q_wait_at_trigger,
         "q_trigger_at_trigger": q_trigger_at_trigger,
+        "speed_at_trigger": speed_at_trigger,
+        "speed_at_collision": collision_v_ego,
     })
 
 # =========================

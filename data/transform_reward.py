@@ -41,7 +41,7 @@ def parse_args():
                         help="Injury risk threshold")
 
     # Optional dataset balancing
-    parser.add_argument("--max_case3", type=int, default=300,
+    parser.add_argument("--max_case3", type=int, default=1000,
                         help="Optional cap on number of no-collision trigger trajectories")
 
     # Demographic / model inputs
@@ -90,6 +90,7 @@ def compute_joint_injury_risk(service, row, args):
     ], dtype=object)
 
     ir = service.predict_injury(data)
+    
     return float(pjoint(ir))
 
 
@@ -205,11 +206,13 @@ def main():
 
         if first_trigger is not None:
             # Trigger happens before any collision by construction
-            trigger_row = df.loc[first_trigger]
-            risk = compute_joint_injury_risk(service, trigger_row, args)
-            high_risk = risk >= args.eta
+            # trigger_row = df.loc[first_trigger]
 
             if eventual_collision:
+                risk = compute_joint_injury_risk(service, df.loc[collision_index], args)
+                # print(risk)
+                high_risk = risk >= args.eta
+
                 terminal_reward = assign_terminal_reward(
                     triggered=True,
                     collision_happens=True,

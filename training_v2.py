@@ -16,13 +16,15 @@ os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
 # Hyperparameters
 # =========================
 gamma = 0.99
-lr = 1e-3
-num_epochs = 50
-batch_size = 128
+lr = 5e-2
+num_epochs = 400
+batch_size = 256
 val_ratio = 0.1
 seed = 42
-hidden_dim = 64
+hidden_dim = 128
 target_update_freq = 5
+lr_step_size = 100  # Learning rate scheduler step size
+lr_gamma = 0.5      # Learning rate decay factor
 checkpoint_path = os.path.join("checkpoints", "model", "q_net.pth")
 loss_plot_path = "Q_loss.png"
 data_path = "data/aggregated/rl_trajectories.pkl"
@@ -227,6 +229,7 @@ def main():
     target_net.eval()
 
     optimizer = optim.Adam(q_net.parameters(), lr=lr)
+    scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=lr_step_size, gamma=lr_gamma)
     loss_fn = nn.MSELoss()
 
     train_losses = []
@@ -293,8 +296,12 @@ def main():
             f"Train Loss: {train_loss:.6f} | "
             f"Val Loss: {val_loss:.6f} | "
             f"Val Trigger Rate: {val_metrics['trigger_rate_all_steps']:.4f} | "
-            f"Val Terminal Trigger Rate: {val_metrics['terminal_trigger_rate']:.4f}"
+            f"Val Terminal Trigger Rate: {val_metrics['terminal_trigger_rate']:.4f} | "
+            f"LR: {scheduler.get_last_lr()[0]:.6f}"
         )
+
+        # ---- Learning rate scheduler step ----
+        scheduler.step()
 
     # =========================
     # Save model + normalization stats
@@ -306,6 +313,7 @@ def main():
             "target_state_dict": target_net.state_dict(),
             "state_mean": state_mean.cpu(),
             "state_std": state_std.cpu(),
+            "scheduler_state_dict": scheduler.state_dict(),
             "hyperparameters": {
                 "gamma": gamma,
                 "lr": lr,
@@ -315,6 +323,8 @@ def main():
                 "seed": seed,
                 "hidden_dim": hidden_dim,
                 "target_update_freq": target_update_freq,
+                "lr_step_size": lr_step_size,
+                "lr_gamma": lr_gamma,
             },
         },
         checkpoint_path,
