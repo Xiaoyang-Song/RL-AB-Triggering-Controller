@@ -8,7 +8,7 @@
 #SBATCH --gpus=1
 #SBATCH --mem-per-gpu=16GB
 #SBATCH --time=5:00:00
-#SBATCH --output=/nfs/turbo/coe-sunwbgt/xysong/RL-AB-Triggering-Controller/checkpoints/logs/sensitivity_j0.out
+#SBATCH --output=/nfs/turbo/coe-sunwbgt/xysong/RL-AB-Triggering-Controller/checkpoints/logs/sensitivity_j5.log
 
 
 # =========================
