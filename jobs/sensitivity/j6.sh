@@ -7,7 +7,7 @@
 #SBATCH --partition=gpu
 #SBATCH --gpus=1
 #SBATCH --mem-per-gpu=16GB
-#SBATCH --time=3:00:00
+#SBATCH --time=4:00:00
 #SBATCH --output=/nfs/turbo/coe-sunwbgt/xysong/RL-AB-Triggering-Controller/checkpoints/logs/sensitivity_j6.log
 
 
@@ -29,10 +29,10 @@ TRIGGER_PROB=0.005
 # =========================
 # Training
 # =========================
-NUM_EPOCHS=500
+NUM_EPOCHS=1000
 LR=5e-3
 HIDDEN_DIM=128
-BATCH_SIZE=16384
+BATCH_SIZE=20000
  
 # =========================
 # Pipeline

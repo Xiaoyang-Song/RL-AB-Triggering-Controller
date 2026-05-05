@@ -1,6 +1,6 @@
 
 
-# sbatch jobs/sensitivity/j0.sh
+sbatch jobs/sensitivity/j0.sh
 sbatch jobs/sensitivity/j1.sh
 sbatch jobs/sensitivity/j2.sh
 sbatch jobs/sensitivity/j3.sh
