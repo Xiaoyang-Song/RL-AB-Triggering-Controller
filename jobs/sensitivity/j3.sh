@@ -31,7 +31,7 @@ TRIGGER_PROB=0.005
 # =========================
 NUM_EPOCHS=1000
 LR=5e-3
-HIDDEN_DIM=128
+HIDDEN_DIM=256
 BATCH_SIZE=20000
  
 # =========================
