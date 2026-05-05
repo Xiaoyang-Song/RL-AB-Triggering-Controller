@@ -32,7 +32,7 @@ TRIGGER_PROB=0.005
 NUM_EPOCHS=500
 LR=5e-3
 HIDDEN_DIM=128
-BATCH_SIZE=10000
+BATCH_SIZE=16384
  
 # =========================
 # Pipeline
