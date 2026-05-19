@@ -47,18 +47,25 @@ def parse_args():
     parser.add_argument("--lr_step_size", type=int, default=100)
     parser.add_argument("--lr_gamma", type=float, default=0.5)
 
+    # Input uncertainty during training
+    parser.add_argument("--train_noise_std", type=float, default=0.0,
+                        help="Std dev of Gaussian noise added to normalized states each batch "
+                             "(0 = disabled). Encourages robustness to sensor uncertainty.")
+
     return parser.parse_args()
 
 
 def build_param_suffix(args):
-    return f"b1{args.b1}_c1{args.c1}_b2{args.b2}_c2{args.c2}_c3{args.c3}_eta{args.eta}"
+    base = f"b1{args.b1}_c1{args.c1}_b2{args.b2}_c2{args.c2}_c3{args.c3}_eta{args.eta}"
+    full = base + (f"_noise{args.train_noise_std}" if args.train_noise_std > 0.0 else "")
+    return base, full
 
 
 def build_paths(args):
-    suffix = build_param_suffix(args)
-    data_path = os.path.join(args.data_dir, f"rl_trajectories_{suffix}.pkl")
-    checkpoint_path = os.path.join(args.checkpoint_dir, f"q_net_{suffix}.pth")
-    loss_plot_path = os.path.join(args.loss_plot_dir, f"Q_loss_{suffix}.png")
+    base_suffix, full_suffix = build_param_suffix(args)
+    data_path = os.path.join(args.data_dir, f"rl_trajectories_{base_suffix}.pkl")
+    checkpoint_path = os.path.join(args.checkpoint_dir, f"q_net_{full_suffix}.pth")
+    loss_plot_path = os.path.join(args.loss_plot_dir, f"Q_loss_{full_suffix}.png")
     return data_path, checkpoint_path, loss_plot_path
 
 
@@ -247,6 +254,10 @@ def main():
     print("Training samples:", len(train_states))
     print("Validation samples:", len(val_states))
 
+    # ---- Keep raw copies for noise-before-normalization ----
+    train_states_raw      = train_states.clone()
+    train_next_states_raw = train_next_states.clone()
+
     # ---- Normalize ----
     (train_states, train_next_states,
      val_states, val_next_states,
@@ -265,6 +276,14 @@ def main():
         train_next_states, train_dones,
         train_ec, train_hr
     )
+
+    if args.train_noise_std > 0.0:
+        train_states_raw, train_next_states_raw = to_device(
+            train_states_raw, train_next_states_raw
+        )
+
+    state_mean_d = state_mean.to(device)
+    state_std_d  = state_std.to(device)
 
     (val_states, val_actions, val_rewards,
      val_next_states, val_dones,
@@ -303,11 +322,19 @@ def main():
         for i in range(0, len(train_states), args.batch_size):
             idx = perm[i:i + args.batch_size]
 
-            s_batch = train_states[idx]
-            a_batch = train_actions[idx]
-            r_batch = train_rewards[idx]
-            s_next_batch = train_next_states[idx]
-            done_batch = train_dones[idx]
+            a_batch      = train_actions[idx]
+            r_batch      = train_rewards[idx]
+            done_batch   = train_dones[idx]
+
+            if args.train_noise_std > 0.0:
+                # Multiplicative noise on raw states, then normalize — matches testing
+                eps   = torch.randn_like(train_states_raw[idx])      * args.train_noise_std
+                eps_n = torch.randn_like(train_next_states_raw[idx]) * args.train_noise_std
+                s_batch      = (train_states_raw[idx]      * (1.0 + eps)   - state_mean_d) / state_std_d
+                s_next_batch = (train_next_states_raw[idx] * (1.0 + eps_n) - state_mean_d) / state_std_d
+            else:
+                s_batch      = train_states[idx]
+                s_next_batch = train_next_states[idx]
 
             q_values = q_net(s_batch)
             q_a = q_values.gather(1, a_batch.unsqueeze(1)).squeeze(1)
@@ -378,6 +405,7 @@ def main():
             "state_mean": state_mean.cpu(),
             "state_std": state_std.cpu(),
             "scheduler_state_dict": scheduler.state_dict(),
+            "train_noise_std": args.train_noise_std,
             "hyperparameters": vars(args),
         },
         checkpoint_path,
@@ -410,6 +438,7 @@ def main():
 
     plt.tight_layout()
     plt.savefig(loss_plot_path)
+    plt.close(fig)
     print(f"Saved loss plot to: {loss_plot_path}")
 
 

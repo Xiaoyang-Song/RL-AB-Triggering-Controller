@@ -1,0 +1,11 @@
+Train-with-noise sweep: noises=0.01 0.05 0.1  reps=20  output=results/train_uncertainty
+-------------------------------------------------------------
+
+>>> Training with noise std: 0.01
+Device: cuda
+Loading data from: data/aggregated/rl_trajectories_b15.0_c16.0_b25.0_c25.0_c35.0_eta0.2.pkl
+Train trajectories: 3226
+Validation trajectories: 359
+Training samples: 450329
+Validation samples: 52770
+Training:   0%|          | 0/1000 [00:00<?, ?it/s]Training:   0%|          | 1/1000 [00:04<1:12:26,  4.35s/it]Training:   0%|          | 2/1000 [00:07<1:05:09,  3.92s/it]Training:   0%|          | 3/1000 [00:11<1:02:40,  3.77s/it]Training:   0%|          | 4/1000 [00:15<1:01:27,  3.70s/it]Training:   0%|          | 5/1000 [00:18<1:00:45,  3.66s/it]Training:   1%|          | 6/1000 [00:22<1:00:14,  3.64s/it]Training:   1%|          | 7/1000 [00:25<59:51,  3.62s/it]  Training:   1%|          | 8/1000 [00:29<59:35,  3.60s/it]Training:   1%|          | 9/1000 [00:33<59:25,  3.60s/it]Training:   1%|          | 10/1000 [00:36<59:20,  3.60s/it]
