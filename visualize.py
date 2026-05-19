@@ -16,6 +16,7 @@ def parse_args():
     parser.add_argument("--c2", type=float, default=3.0)
     parser.add_argument("--c3", type=float, default=2.0)
     parser.add_argument("--eta", type=float, default=0.2)
+    parser.add_argument("--label", type=str, default="", help="Optional label tag appended to CSV filename (e.g., 'rep1')")
 
     return parser.parse_args()
 
@@ -27,7 +28,8 @@ def build_param_suffix(args):
 def main():
     args = parse_args()
     suffix = build_param_suffix(args)
-    results_path = f"{args.results_dir}/evaluation_results_{suffix}.csv"
+    label_part = f"_{args.label}" if args.label else ""
+    results_path = f"{args.results_dir}/evaluation_results_{suffix}{label_part}.csv"
 
     print(f"Loading results from: {results_path}")
     results_df = pd.read_csv(results_path)

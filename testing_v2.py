@@ -35,6 +35,13 @@ def parse_args():
     parser.add_argument("--c3", type=float, default=2.0)
     parser.add_argument("--eta", type=float, default=0.2)
 
+    # Uncertainty Analysis
+    parser.add_argument("--uncertainty_analysis", action="store_true")
+    parser.add_argument("--magnitude_variation", type=float, default=0.1, help="Std dev of Gaussian perturbation applied to state inputs (e.g., 0.1 = 10%% of each component)")
+
+    # Output label — appended to CSV filename to distinguish replications
+    parser.add_argument("--label", type=str, default="", help="Optional tag appended to output CSV filename (e.g., 'rep1')")
+
     # Demographic / injury model inputs
     parser.add_argument("--height", type=float, default=1.65)
     parser.add_argument("--sex", type=str, default="F")
@@ -58,7 +65,8 @@ def build_param_suffix(args):
 def build_paths(args):
     suffix = build_param_suffix(args)
     checkpoint_path = os.path.join(args.checkpoint_dir, f"q_net_{suffix}.pth")
-    output_path = os.path.join(args.output_dir, f"evaluation_results_{suffix}.csv")
+    label_part = f"_{args.label}" if args.label else ""
+    output_path = os.path.join(args.output_dir, f"evaluation_results_{suffix}{label_part}.csv")
     return checkpoint_path, output_path
 
 
@@ -94,6 +102,9 @@ def main():
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print("Device:", device)
+
+    if args.uncertainty_analysis:
+        assert args.magnitude_variation is not None, "Magnitude variation must be specified for uncertainty analysis."
 
     checkpoint_path, output_path = build_paths(args)
     print(f"Loading checkpoint from: {checkpoint_path}")
@@ -204,6 +215,12 @@ def main():
         q_trigger_at_trigger = None
         speed_at_trigger = None
 
+        # Sample one Gaussian perturbation per trajectory (applied uniformly to all frames)
+        if args.uncertainty_analysis:
+            perturbation = np.random.normal(
+                0.0, args.magnitude_variation, size=(4,)
+            ).astype(np.float32)
+
         for _, row in df.iterrows():
             current_frame = int(row["frame"])
 
@@ -217,6 +234,9 @@ def main():
                 row["dx"],
                 row["dy"],
             ], dtype=np.float32)
+
+            if args.uncertainty_analysis:
+                state = state * (1.0 + perturbation)
 
             state_tensor = torch.tensor(state, dtype=torch.float32, device=device).unsqueeze(0)
             state_tensor = (state_tensor - state_mean) / state_std
