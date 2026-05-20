@@ -1,0 +1,2 @@
+n_trajectories,n_high_risk,n_low_risk_collision,n_no_collision,n_triggered,success_trigger_rate_%,low_risk_triggered_%,low_risk_not_triggered_%,no_collision_triggered_%,no_collision_not_triggered_%,type1_rate_%,type2_rate_%,mean_ttc_at_trigger,mean_speed_at_trigger_kph,n_replications
+4914.0000 ± 0.0000,1450.0000 ± 0.0000,727.0000 ± 0.0000,2737.0000 ± 0.0000,1956.6500 ± 34.2503,78.8793 ± 0.9078,19.8349 ± 1.4465,80.1651 ± 1.4465,24.4319 ± 0.8454,75.5681 ± 0.8454,23.4671 ± 0.8179,21.1207 ± 0.9078,72.7968 ± 1.3862,55.7242 ± 0.2133,20
