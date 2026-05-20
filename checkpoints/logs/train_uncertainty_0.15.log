@@ -1,0 +1,59 @@
+Train-with-noise sweep: noises=0.01 0.05 0.1  reps=20  output=results/train_uncertainty_0.15
+-------------------------------------------------------------
+
+>>> Training with noise std: 0.01
+Device: cuda
+Loading data from: data/aggregated/rl_trajectories_b15.0_c16.0_b25.0_c25.0_c35.0_eta0.15.pkl
+Traceback (most recent call last):
+  File "/nfs/turbo/coe-sunwbgt/xysong/RL-AB-Triggering-Controller/training_v2.py", line 447, in <module>
+    main()
+  File "/nfs/turbo/coe-sunwbgt/xysong/RL-AB-Triggering-Controller/training_v2.py", line 232, in main
+    with open(data_path, "rb") as f:
+FileNotFoundError: [Errno 2] No such file or directory: 'data/aggregated/rl_trajectories_b15.0_c16.0_b25.0_c25.0_c35.0_eta0.15.pkl'
+
+    Training done. Running 20 evaluation trials...
+  [noise=0.01  rep=1/20]  seed=1
+loading model: GP_pred/GP_hic.json
+loading model: GP_pred/GP_lacc.json
+loading model: GP_pred/GP_ln.json
+loading model: GP_pred/GP_pelvis.json
+loading model: GP_pred/GP_racc.json
+loading model: GP_pred/GP_rn.json
+loading model: GP_pred/GP_sternum.json
+Device: cuda
+Loading checkpoint from: checkpoints/model/q_net_b15.0_c16.0_b25.0_c25.0_c35.0_eta0.15_noise0.01.pth
+Traceback (most recent call last):
+  File "/nfs/turbo/coe-sunwbgt/xysong/RL-AB-Triggering-Controller/testing_v2.py", line 331, in <module>
+    main()
+  File "/nfs/turbo/coe-sunwbgt/xysong/RL-AB-Triggering-Controller/testing_v2.py", line 122, in main
+    checkpoint = torch.load(checkpoint_path, map_location=device)
+  File "/home/xysong/.conda/envs/OoD/lib/python3.9/site-packages/torch/serialization.py", line 699, in load
+    with _open_file_like(f, 'rb') as opened_file:
+  File "/home/xysong/.conda/envs/OoD/lib/python3.9/site-packages/torch/serialization.py", line 230, in _open_file_like
+    return _open_file(name_or_buffer, mode)
+  File "/home/xysong/.conda/envs/OoD/lib/python3.9/site-packages/torch/serialization.py", line 211, in __init__
+    super(_open_file, self).__init__(open(name, mode))
+FileNotFoundError: [Errno 2] No such file or directory: 'checkpoints/model/q_net_b15.0_c16.0_b25.0_c25.0_c35.0_eta0.15_noise0.01.pth'
+  [noise=0.01  rep=2/20]  seed=2
+loading model: GP_pred/GP_hic.json
+loading model: GP_pred/GP_lacc.json
+loading model: GP_pred/GP_ln.json
+loading model: GP_pred/GP_pelvis.json
+loading model: GP_pred/GP_racc.json
+loading model: GP_pred/GP_rn.json
+loading model: GP_pred/GP_sternum.json
+Device: cuda
+Loading checkpoint from: checkpoints/model/q_net_b15.0_c16.0_b25.0_c25.0_c35.0_eta0.15_noise0.01.pth
+Traceback (most recent call last):
+  File "/nfs/turbo/coe-sunwbgt/xysong/RL-AB-Triggering-Controller/testing_v2.py", line 331, in <module>
+    main()
+  File "/nfs/turbo/coe-sunwbgt/xysong/RL-AB-Triggering-Controller/testing_v2.py", line 122, in main
+    checkpoint = torch.load(checkpoint_path, map_location=device)
+  File "/home/xysong/.conda/envs/OoD/lib/python3.9/site-packages/torch/serialization.py", line 699, in load
+    with _open_file_like(f, 'rb') as opened_file:
+  File "/home/xysong/.conda/envs/OoD/lib/python3.9/site-packages/torch/serialization.py", line 230, in _open_file_like
+    return _open_file(name_or_buffer, mode)
+  File "/home/xysong/.conda/envs/OoD/lib/python3.9/site-packages/torch/serialization.py", line 211, in __init__
+    super(_open_file, self).__init__(open(name, mode))
+FileNotFoundError: [Errno 2] No such file or directory: 'checkpoints/model/q_net_b15.0_c16.0_b25.0_c25.0_c35.0_eta0.15_noise0.01.pth'
+  [noise=0.01  rep=3/20]  seed=3

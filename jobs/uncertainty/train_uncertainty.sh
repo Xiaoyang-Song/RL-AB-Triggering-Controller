@@ -7,8 +7,8 @@
 #SBATCH --partition=gpu
 #SBATCH --gpus=1
 #SBATCH --mem-per-gpu=16GB
-#SBATCH --time=48:00:00
-#SBATCH --output=/nfs/turbo/coe-sunwbgt/xysong/RL-AB-Triggering-Controller/checkpoints/logs/train_uncertainty_j0.log
+#SBATCH --time=14:00:00
+#SBATCH --output=/nfs/turbo/coe-sunwbgt/xysong/RL-AB-Triggering-Controller/checkpoints/logs/train_uncertainty_0.15.log
 
 
 
@@ -20,7 +20,7 @@ C1=6.0
 B2=5.0
 C2=5.0
 C3=5.0
-ETA=0.2
+ETA=0.15
 
 # =========================
 # Training hyperparameters
@@ -35,7 +35,7 @@ BATCH_SIZE=20000
 # =========================
 TRAIN_NOISES=(0.01 0.05 0.1)
 NUM_REPS=20
-BASE_OUTPUT_DIR="results/train_uncertainty"
+BASE_OUTPUT_DIR="results/train_uncertainty_0.15"
 
 echo "Train-with-noise sweep: noises=${TRAIN_NOISES[*]}  reps=${NUM_REPS}  output=${BASE_OUTPUT_DIR}"
 echo "-------------------------------------------------------------"
