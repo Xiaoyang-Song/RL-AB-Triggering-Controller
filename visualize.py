@@ -133,7 +133,19 @@ def main():
     # print(trigger_collision_cases[[
     #     "trajectory_id", "collision", "triggered",
     #     "ttc_at_trigger", "pjoint"
-    # ]].head(12))
+    # ]].head(12)
+    # 
+    # Additional
+    ttc_example = results_df.loc[
+        (results_df["collision"] == True) & (results_df["triggered"] == True) & (results_df["ttc_at_trigger"] > 200)
+    ]
+    print(ttc_example[[
+        "trajectory_id", "collision", "triggered",
+        "ttc_at_trigger", "pjoint"
+    ]].head(5))
+
+
+
 
 
 if __name__ == "__main__":
