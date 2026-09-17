@@ -1,0 +1,1 @@
+| Policy Loss: -4638858.350543 | Value Loss: 3.902945 | Val Value Loss: 4.494951 | Train Type-I: 0.4880 (873/1789) | Train Type-II: 0.1406 (202/1437) | Val Type-I: 0.5231 (113/216) | Val Type-II: 0.1399 (20/143) | Actor LR: 0.001000
