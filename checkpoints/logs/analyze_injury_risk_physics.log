@@ -1,0 +1,10 @@
+loading model: GP_pred/GP_hic.json
+loading model: GP_pred/GP_lacc.json
+loading model: GP_pred/GP_ln.json
+loading model: GP_pred/GP_pelvis.json
+loading model: GP_pred/GP_racc.json
+loading model: GP_pred/GP_rn.json
+loading model: GP_pred/GP_sternum.json
+Total trajectories: 4914 | trigger/collision anchors: 2563 | closest-approach anchors: 2351
+Saved per-trajectory physics-estimated data to: plots/sweep_allfive/j1/injury_risk_physics_curve_data.csv
+Saved figure to: plots/sweep_allfive/j1/injury_risk_physics_curve.png
