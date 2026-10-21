@@ -17,6 +17,8 @@ def parse_args():
     parser.add_argument("--eta", type=float, default=0.2)
     parser.add_argument("--include_gforce", action="store_true",
                         help="Resolve the results CSV for the 5D-state (gforce) run.")
+    parser.add_argument("--use_best", action="store_true",
+                        help="Resolve the results CSV for the _best (lowest val Type-I+Type-II error) checkpoint.")
     parser.add_argument("--train_noise_std", type=float, default=0.0,
                         help="Noise std used during training (0 = no noise). Used to locate the correct results file.")
     parser.add_argument("--label", type=str, default="", help="Optional label tag appended to CSV filename (e.g., 'rep1')")
@@ -35,8 +37,9 @@ def build_param_suffix(args):
 def main():
     args = parse_args()
     suffix = build_param_suffix(args)
+    best_part = "_best" if args.use_best else ""
     label_part = f"_{args.label}" if args.label else ""
-    results_path = f"{args.results_dir}/evaluation_results_{suffix}{label_part}.csv"
+    results_path = f"{args.results_dir}/evaluation_results_{suffix}{best_part}{label_part}.csv"
 
     print(f"Loading results from: {results_path}")
     results_df = pd.read_csv(results_path)

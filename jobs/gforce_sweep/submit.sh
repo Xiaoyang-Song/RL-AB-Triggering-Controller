@@ -1,0 +1,10 @@
+sbatch jobs/gforce_sweep/j0.sh
+sbatch jobs/gforce_sweep/j1.sh
+sbatch jobs/gforce_sweep/j2.sh
+sbatch jobs/gforce_sweep/j3.sh
+sbatch jobs/gforce_sweep/j4.sh
+sbatch jobs/gforce_sweep/j5.sh
+sbatch jobs/gforce_sweep/j6.sh
+sbatch jobs/gforce_sweep/j7.sh
+sbatch jobs/gforce_sweep/j8.sh
+sbatch jobs/gforce_sweep/j9.sh

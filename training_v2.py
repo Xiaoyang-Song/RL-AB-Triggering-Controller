@@ -319,6 +319,24 @@ def main():
     scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=args.lr_step_size, gamma=args.lr_gamma)
     loss_fn = nn.MSELoss()
 
+    def build_checkpoint_dict():
+        return {
+            "model_state_dict": q_net.state_dict(),
+            "target_state_dict": target_net.state_dict(),
+            "state_mean": state_mean.cpu(),
+            "state_std": state_std.cpu(),
+            "scheduler_state_dict": scheduler.state_dict(),
+            "train_noise_std": args.train_noise_std,
+            "state_cols": state_cols,
+            "hyperparameters": vars(args),
+        }
+
+    best_checkpoint_path = checkpoint_path[:-len(".pth")] + "_best.pth"
+    best_val_combined_error = float("inf")
+    best_val_loss = float("inf")
+    best_epoch = -1
+    os.makedirs(os.path.dirname(checkpoint_path), exist_ok=True)
+
     # ---- Tracking ----
     train_losses = []
     val_losses = []
@@ -388,6 +406,18 @@ def main():
         train_errors = evaluate_errors(q_net, train_traj, state_mean, state_std, state_cols)
         val_errors = evaluate_errors(q_net, val_traj, state_mean, state_std, state_cols)
 
+        # ---- Track best checkpoint by *decision quality*, not MSE loss ----
+        # Val loss bottoms out early (before the trigger/no-trigger boundary is
+        # calibrated), so picking min(val_loss) selects an undertrained network
+        # that triggers on nearly everything: low Type-II, catastrophic Type-I.
+        # Combined Type-I + Type-II error directly reflects what we actually want.
+        val_combined_error = val_errors["type1_error"] + val_errors["type2_error"]
+        if val_combined_error < best_val_combined_error:
+            best_val_combined_error = val_combined_error
+            best_val_loss = val_loss
+            best_epoch = epoch + 1
+            torch.save(build_checkpoint_dict(), best_checkpoint_path)
+
         train_type1_errors.append(train_errors["type1_error"])
         train_type2_errors.append(train_errors["type2_error"])
         val_type1_errors.append(val_errors["type1_error"])
@@ -414,20 +444,12 @@ def main():
     # Save model + normalization stats
     # =========================
     os.makedirs(os.path.dirname(checkpoint_path), exist_ok=True)
-    torch.save(
-        {
-            "model_state_dict": q_net.state_dict(),
-            "target_state_dict": target_net.state_dict(),
-            "state_mean": state_mean.cpu(),
-            "state_std": state_std.cpu(),
-            "scheduler_state_dict": scheduler.state_dict(),
-            "train_noise_std": args.train_noise_std,
-            "state_cols": state_cols,
-            "hyperparameters": vars(args),
-        },
-        checkpoint_path,
+    torch.save(build_checkpoint_dict(), checkpoint_path)
+    print(f"Saved final-epoch checkpoint to: {checkpoint_path}")
+    print(
+        f"Saved best checkpoint (epoch {best_epoch}, val Type-I+II={best_val_combined_error:.4f}, "
+        f"val_loss={best_val_loss:.6f}) to: {best_checkpoint_path}"
     )
-    print(f"Saved checkpoint to: {checkpoint_path}")
 
     # =========================
     # Plot losses and errors

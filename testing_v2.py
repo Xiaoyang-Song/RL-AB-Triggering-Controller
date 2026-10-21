@@ -39,6 +39,9 @@ def parse_args():
     parser.add_argument("--include_gforce", action="store_true",
                         help="Evaluate the 5D-state checkpoint (adds gforce, parsed "
                              "per-trajectory from simulation_log.txt).")
+    parser.add_argument("--use_best", action="store_true",
+                        help="Load the _best (lowest val Type-I+Type-II error) checkpoint "
+                             "saved by training_v2.py instead of the final-epoch one.")
 
     # Uncertainty Analysis (testing)
     parser.add_argument("--uncertainty_analysis", action="store_true")
@@ -78,9 +81,10 @@ def build_param_suffix(args):
 
 def build_paths(args):
     suffix = build_param_suffix(args)
-    checkpoint_path = os.path.join(args.checkpoint_dir, f"q_net_{suffix}.pth")
+    best_part = "_best" if args.use_best else ""
+    checkpoint_path = os.path.join(args.checkpoint_dir, f"q_net_{suffix}{best_part}.pth")
     label_part = f"_{args.label}" if args.label else ""
-    output_path = os.path.join(args.output_dir, f"evaluation_results_{suffix}{label_part}.csv")
+    output_path = os.path.join(args.output_dir, f"evaluation_results_{suffix}{best_part}{label_part}.csv")
     return checkpoint_path, output_path
 
 
