@@ -35,6 +35,11 @@ def parse_args():
     parser.add_argument("--c3", type=float, default=2.0)
     parser.add_argument("--eta", type=float, default=0.2)
 
+    # State features
+    parser.add_argument("--include_gforce", action="store_true",
+                        help="Evaluate the 5D-state checkpoint (adds gforce, parsed "
+                             "per-trajectory from simulation_log.txt).")
+
     # Uncertainty Analysis (testing)
     parser.add_argument("--uncertainty_analysis", action="store_true")
     parser.add_argument("--magnitude_variation", type=float, default=0.1, help="Std dev of Gaussian perturbation applied to state inputs (e.g., 0.1 = 10%% of each component)")
@@ -64,6 +69,8 @@ def parse_args():
 
 def build_param_suffix(args):
     suffix = f"b1{args.b1}_c1{args.c1}_b2{args.b2}_c2{args.c2}_c3{args.c3}_eta{args.eta}"
+    if args.include_gforce:
+        suffix += "_gforce"
     if args.train_noise_std > 0.0:
         suffix += f"_noise{args.train_noise_std}"
     return suffix
@@ -75,6 +82,20 @@ def build_paths(args):
     label_part = f"_{args.label}" if args.label else ""
     output_path = os.path.join(args.output_dir, f"evaluation_results_{suffix}{label_part}.csv")
     return checkpoint_path, output_path
+
+
+def load_gforce(traj_dir):
+    log_path = os.path.join(traj_dir, "simulation_log.txt")
+    if not os.path.exists(log_path):
+        return None
+    with open(log_path, "r", encoding="latin-1", errors="ignore") as f:
+        for line in f:
+            if line.strip().startswith("gforce:"):
+                try:
+                    return float(line.split("gforce:")[1].strip())
+                except ValueError:
+                    return None
+    return None
 
 
 # =========================
@@ -121,8 +142,17 @@ def main():
     # =========================
     checkpoint = torch.load(checkpoint_path, map_location=device)
     hidden_dim = checkpoint.get("hyperparameters", {}).get("hidden_dim", 64)
+    state_cols = checkpoint.get("state_cols", ["walker_vel_ms", "ego_vel_ms", "dx", "dy"])
+    include_gforce = "gforce" in state_cols
 
-    q_net = QNetwork(hidden_dim=hidden_dim).to(device)
+    if include_gforce != args.include_gforce:
+        print(
+            f"Warning: --include_gforce={args.include_gforce} but the loaded "
+            f"checkpoint's state_cols={state_cols}; using the checkpoint's own "
+            f"state definition."
+        )
+
+    q_net = QNetwork(state_dim=len(state_cols), hidden_dim=hidden_dim).to(device)
     q_net.load_state_dict(checkpoint["model_state_dict"])
     q_net.eval()
 
@@ -156,10 +186,18 @@ def main():
         collision_path = os.path.join(traj_folder, "collision.csv")
 
         if os.path.exists(file_path):
+            if include_gforce:
+                gforce = load_gforce(os.path.join(args.root_folder, traj_id_str))
+                if gforce is None:
+                    print(f"Skipping trajectory {traj_id}: gforce not found in simulation_log.txt")
+                    continue
+
             df = pd.read_csv(file_path, usecols=cols_to_use)
             df["dx"] = df["w_location_x"] - df["e_location_x"]
             df["dy"] = df["w_location_y"] - df["e_location_y"]
             df["trajectory_id"] = traj_id
+            if include_gforce:
+                df["gforce"] = gforce
             all_trajectories.append(df)
             collisions.append(os.path.exists(collision_path))
         else:
@@ -225,7 +263,7 @@ def main():
         # Sample one Gaussian perturbation per trajectory (applied uniformly to all frames)
         if args.uncertainty_analysis:
             perturbation = np.random.normal(
-                0.0, args.magnitude_variation, size=(4,)
+                0.0, args.magnitude_variation, size=(len(state_cols),)
             ).astype(np.float32)
 
         for _, row in df.iterrows():
@@ -235,12 +273,7 @@ def main():
             if collision_frame is not None and current_frame >= collision_frame:
                 break
 
-            state = np.array([
-                row["walker_vel_ms"],
-                row["ego_vel_ms"],
-                row["dx"],
-                row["dy"],
-            ], dtype=np.float32)
+            state = np.array([row[c] for c in state_cols], dtype=np.float32)
 
             if args.uncertainty_analysis:
                 state = state * (1.0 + perturbation)

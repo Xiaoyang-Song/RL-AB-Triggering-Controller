@@ -40,6 +40,12 @@ def parse_args():
     parser.add_argument("--eta", type=float, default=0.2,
                         help="Injury risk threshold")
 
+    # State features
+    parser.add_argument("--include_gforce", action="store_true",
+                        help="Add the per-trajectory gforce value (parsed from "
+                             "simulation_log.txt) as an extra, time-constant state "
+                             "dimension alongside walker_vel_ms/ego_vel_ms/dx/dy.")
+
     # Optional dataset balancing
     parser.add_argument("--max_case3", type=int, default=1000,
                         help="Optional cap on number of no-collision trigger trajectories")
@@ -95,6 +101,26 @@ def compute_joint_injury_risk(service, row, args):
     return float(pjoint(ir))
 
 
+def load_gforce(traj_dir):
+    """
+    gforce is computed once per simulation run and printed a single time in
+    simulation_log.txt — it does not vary across frames, so it is read here
+    as a single scalar and later broadcast to every row of the trajectory.
+    """
+    log_path = os.path.join(traj_dir, "simulation_log.txt")
+    if not os.path.exists(log_path):
+        return None
+
+    with open(log_path, "r", encoding="latin-1", errors="ignore") as f:
+        for line in f:
+            if line.strip().startswith("gforce:"):
+                try:
+                    return float(line.split("gforce:")[1].strip())
+                except ValueError:
+                    return None
+    return None
+
+
 def load_collision_frame(collision_path):
     if not os.path.exists(collision_path):
         return None
@@ -110,6 +136,8 @@ def build_output_filename(args):
     param_str = (
         f"b1{args.b1}_c1{args.c1}_b2{args.b2}_c2{args.c2}_c3{args.c3}_eta{args.eta}"
     )
+    if args.include_gforce:
+        param_str += "_gforce"
     base_dir = os.path.dirname(args.output_dir)
     return os.path.join(base_dir, f"rl_trajectories_{param_str}.pkl")
 
@@ -169,11 +197,22 @@ def main():
             print(f"File not found: {file_path}")
             continue
 
+        if args.include_gforce:
+            traj_dir = os.path.join(args.root_folder, traj_name)
+            gforce = load_gforce(traj_dir)
+            if gforce is None:
+                print(f"Skipping {traj_id}: gforce not found in simulation_log.txt")
+                continue
+
         df = pd.read_csv(file_path, usecols=COLS_TO_USE).copy()
 
         # Relative position
         df["dx"] = df["w_location_x"] - df["e_location_x"]
         df["dy"] = df["w_location_y"] - df["e_location_y"]
+
+        if args.include_gforce:
+            # Constant per trajectory — broadcast to every frame.
+            df["gforce"] = gforce
 
         # Initialize
         df["action_trigger"] = 0
@@ -277,6 +316,10 @@ def main():
         "ego_vel_ms",
         "dx",
         "dy",
+    ]
+    if args.include_gforce:
+        selected_cols.append("gforce")
+    selected_cols += [
         "action_trigger",
         "reward",
         "eventual_collision",

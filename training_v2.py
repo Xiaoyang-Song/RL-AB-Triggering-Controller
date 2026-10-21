@@ -35,6 +35,11 @@ def parse_args():
     parser.add_argument("--c3", type=float, default=2.0)
     parser.add_argument("--eta", type=float, default=0.2)
 
+    # State features
+    parser.add_argument("--include_gforce", action="store_true",
+                        help="Train on the 5D state (adds gforce). Loads "
+                             "rl_trajectories_{...}_gforce.pkl instead of the 4D dataset.")
+
     # Training hyperparameters
     parser.add_argument("--gamma", type=float, default=0.99)
     parser.add_argument("--lr", type=float, default=5e-2)
@@ -57,8 +62,17 @@ def parse_args():
 
 def build_param_suffix(args):
     base = f"b1{args.b1}_c1{args.c1}_b2{args.b2}_c2{args.c2}_c3{args.c3}_eta{args.eta}"
+    if args.include_gforce:
+        base += "_gforce"
     full = base + (f"_noise{args.train_noise_std}" if args.train_noise_std > 0.0 else "")
     return base, full
+
+
+STATE_COLS = ["walker_vel_ms", "ego_vel_ms", "dx", "dy"]
+
+
+def state_columns(args):
+    return STATE_COLS + (["gforce"] if args.include_gforce else [])
 
 
 def build_paths(args):
@@ -100,7 +114,7 @@ def set_seed(seed_value: int):
         torch.cuda.manual_seed_all(seed_value)
 
 
-def build_dataset(trajectories):
+def build_dataset(trajectories, state_cols):
     """
     Convert list of trajectories into transition tuples:
     (state, action, reward, next_state, done, eventual_collision, high_risk)
@@ -120,7 +134,7 @@ def build_dataset(trajectories):
         if len(traj) == 0:
             continue
 
-        states = traj[["walker_vel_ms", "ego_vel_ms", "dx", "dy"]].values.astype(np.float32)
+        states = traj[state_cols].values.astype(np.float32)
         actions = traj["action_trigger"].values.astype(np.int64)
         rewards = traj["reward"].values.astype(np.float32)
         T = len(traj)
@@ -167,7 +181,7 @@ def normalize_states(train_states, train_next_states, val_states, val_next_state
     return train_states, train_next_states, val_states, val_next_states, mean, std
 
 
-def evaluate_errors(q_net, trajectories, state_mean, state_std):
+def evaluate_errors(q_net, trajectories, state_mean, state_std, state_cols):
     """
     Type-I  (false positive): model triggers when it shouldn't
              — low injury risk collision, OR no collision at all
@@ -190,7 +204,7 @@ def evaluate_errors(q_net, trajectories, state_mean, state_std):
             eventual_collision = bool(traj["eventual_collision"].iloc[-1])
             high_risk = bool(traj["high_risk"].iloc[-1])
 
-            states = traj[["walker_vel_ms", "ego_vel_ms", "dx", "dy"]].values.astype(np.float32)
+            states = traj[state_cols].values.astype(np.float32)
             states = torch.tensor(states, dtype=torch.float32, device=device)
             states = (states - state_mean.to(device)) / state_std.to(device)
 
@@ -226,7 +240,9 @@ def main():
     set_seed(args.seed)
 
     data_path, checkpoint_path, loss_plot_path = build_paths(args)
+    state_cols = state_columns(args)
     print(f"Loading data from: {data_path}")
+    print(f"State columns ({len(state_cols)}D): {state_cols}")
 
     # ---- Load trajectories ----
     with open(data_path, "rb") as f:
@@ -245,11 +261,11 @@ def main():
     # ---- Build datasets ----
     (train_states, train_actions, train_rewards,
      train_next_states, train_dones,
-     train_ec, train_hr) = build_dataset(train_traj)
+     train_ec, train_hr) = build_dataset(train_traj, state_cols)
 
     (val_states, val_actions, val_rewards,
      val_next_states, val_dones,
-     val_ec, val_hr) = build_dataset(val_traj)
+     val_ec, val_hr) = build_dataset(val_traj, state_cols)
 
     print("Training samples:", len(train_states))
     print("Validation samples:", len(val_states))
@@ -294,8 +310,8 @@ def main():
     )
 
     # ---- Networks ----
-    q_net = QNetwork(hidden_dim=args.hidden_dim).to(device)
-    target_net = QNetwork(hidden_dim=args.hidden_dim).to(device)
+    q_net = QNetwork(state_dim=len(state_cols), hidden_dim=args.hidden_dim).to(device)
+    target_net = QNetwork(state_dim=len(state_cols), hidden_dim=args.hidden_dim).to(device)
     target_net.load_state_dict(q_net.state_dict())
     target_net.eval()
 
@@ -369,8 +385,8 @@ def main():
             target_net.load_state_dict(q_net.state_dict())
 
         # ---- Type-I / Type-II errors on train and val ----
-        train_errors = evaluate_errors(q_net, train_traj, state_mean, state_std)
-        val_errors = evaluate_errors(q_net, val_traj, state_mean, state_std)
+        train_errors = evaluate_errors(q_net, train_traj, state_mean, state_std, state_cols)
+        val_errors = evaluate_errors(q_net, val_traj, state_mean, state_std, state_cols)
 
         train_type1_errors.append(train_errors["type1_error"])
         train_type2_errors.append(train_errors["type2_error"])
@@ -406,6 +422,7 @@ def main():
             "state_std": state_std.cpu(),
             "scheduler_state_dict": scheduler.state_dict(),
             "train_noise_std": args.train_noise_std,
+            "state_cols": state_cols,
             "hyperparameters": vars(args),
         },
         checkpoint_path,

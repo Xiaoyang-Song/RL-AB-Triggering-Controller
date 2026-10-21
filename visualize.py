@@ -15,6 +15,8 @@ def parse_args():
     parser.add_argument("--c2", type=float, default=3.0)
     parser.add_argument("--c3", type=float, default=2.0)
     parser.add_argument("--eta", type=float, default=0.2)
+    parser.add_argument("--include_gforce", action="store_true",
+                        help="Resolve the results CSV for the 5D-state (gforce) run.")
     parser.add_argument("--train_noise_std", type=float, default=0.0,
                         help="Noise std used during training (0 = no noise). Used to locate the correct results file.")
     parser.add_argument("--label", type=str, default="", help="Optional label tag appended to CSV filename (e.g., 'rep1')")
@@ -24,6 +26,8 @@ def parse_args():
 
 def build_param_suffix(args):
     suffix = f"b1{args.b1}_c1{args.c1}_b2{args.b2}_c2{args.c2}_c3{args.c3}_eta{args.eta}"
+    if args.include_gforce:
+        suffix += "_gforce"
     if args.train_noise_std > 0.0:
         suffix += f"_noise{args.train_noise_std}"
     return suffix
